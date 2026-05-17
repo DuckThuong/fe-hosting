@@ -1,56 +1,57 @@
-import { Col, Row } from "antd";
-import barLeft from "../../../../assets/svg/icn-bar-left.svg";
-import { profileItems } from "../../../../common/config/config";
-import type { ProfileItem } from "../../../../common/types/profile";
-import { useNavigate } from "react-router-dom";
-import { useNotification } from "../../../../providers/notificationProvider";
 import {
-  NOTI_SUCCESS,
-  TYPE_LOG_OUT,
-} from "../../../../common/constants/constants";
-import { ROUTER_PATH } from "../../../../router/Route";
+  CreditCardOutlined,
+  HomeOutlined,
+  MessageOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
+import { Menu } from "antd";
+import { useLocation, useNavigate } from "react-router-dom";
+import { ROUTER_PATH } from "@router/Route";
 import "./style.scss";
-import { useState } from "react";
 
-export const ProfileSideBar = () => {
-  const [tabActive, setTabActive] = useState<number>();
-  const [colaspe, setColaspe] = useState<boolean>();
+export const ProfileSidebar = () => {
   const navigate = useNavigate();
-  const { showNotification } = useNotification();
+  const location = useLocation();
 
-  const handleProfileClick = (data: ProfileItem) => {
-    if (data.key === TYPE_LOG_OUT) {
-      localStorage.removeItem("token");
-      localStorage.removeItem("userRole");
-      showNotification("Đăng xuất thành công!", NOTI_SUCCESS);
-      navigate(ROUTER_PATH.SIGN_IN);
-    } else {
-      setColaspe(!colaspe);
-      setTabActive(data.key);
-      navigate(data.href);
-    }
+  const menuItems = [
+    {
+      key: ROUTER_PATH.PROFILE_INFORMATION,
+      icon: <UserOutlined />,
+      label: "Thong tin ca nhan",
+    },
+    {
+      key: ROUTER_PATH.PROFILE_CHAT,
+      icon: <MessageOutlined />,
+      label: "Tin nhan",
+    },
+    {
+      key: ROUTER_PATH.PROFILE_OWNER_PACKAGE,
+      icon: <CreditCardOutlined />,
+      label: "Goi dang tin",
+    },
+    {
+      type: "divider" as const,
+    },
+    {
+      key: ROUTER_PATH.RENTER,
+      icon: <HomeOutlined />,
+      label: "Kenh chu phong",
+    },
+  ];
+
+  const handleMenuClick = (info: { key: string }) => {
+    navigate(info.key);
   };
+
   return (
-    <div className={`profile__sideBar ${colaspe && "colaspe"}`}>
-      <div className="profile__sideBar-header">
-        <img src={barLeft} alt="Close" onClick={() => setColaspe(!colaspe)} />
-      </div>
-      <div className="profile__sideBar-body">
-        {profileItems.map((item: ProfileItem) => (
-          <Row
-            gutter={[16, 16]}
-            className={`profile__sideBar-body-item ${tabActive === item.key && "active"}`}
-            onClick={() => handleProfileClick(item)}
-          >
-            <Col span={4}>
-              <img src={item.icon} alt={item.label} />
-            </Col>
-            <Col span={20}>
-              <p>{item.label}</p>
-            </Col>
-          </Row>
-        ))}
-      </div>
+    <div className="profile-sidebar">
+      <Menu
+        mode="vertical"
+        selectedKeys={[location.pathname]}
+        items={menuItems}
+        onClick={handleMenuClick}
+        className="profile-menu"
+      />
     </div>
   );
 };

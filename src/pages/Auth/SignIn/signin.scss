@@ -1,4 +1,4 @@
-@import "../../../color.scss";
+@import "@/color.scss";
 
 .sign_in {
   &-title {
@@ -42,7 +42,6 @@
           align-items: center;
           max-width: 100%;
           width: 100%;
-          gap: 12px;
           .form-input {
             max-width: 100%;
           }
@@ -58,10 +57,49 @@
               width: 100%;
             }
           }
+          .tool-bar {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+          
+          .remember-me {
+            width: 100%;
+            margin-top: -4px;
+            margin-bottom: 0;
+            color: $primary-color;
+            font-family: $font_family_1;
+            display: flex;
+            justify-content: flex-start;
+            align-items: flex-start;
 
-          // input {
-          //   width: 450px;
-          // }
+            .ant-form-item-control-input-content {
+              display: flex;
+              justify-content: flex-start;
+            }
+
+            .ant-checkbox-wrapper {
+              color: inherit;
+              font-family: inherit;
+            }
+          }
+          .forgot-password {
+            width: 100%;
+            text-align: right;
+            font-weight: 400;
+            color: $color-text-primary;
+            font-size: 14px;
+            line-height: 1.5;
+            font-family: $font_family_1;
+            font-style: italic;
+            cursor: pointer;
+
+            &:hover {
+              text-decoration: underline;
+            }
+          }
+        }
         }
 
         &-3 {
@@ -94,9 +132,13 @@
             color: $primary-color;
             font-family: $font_family_1;
 
-            span {
+            .sign-up-link {
+              background: transparent;
+              border: none;
+              padding: 0;
               font-weight: 700;
               cursor: pointer;
+              color: inherit;
 
               &:hover {
                 text-decoration: underline;

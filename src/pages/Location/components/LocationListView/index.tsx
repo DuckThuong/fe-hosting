@@ -1,119 +1,178 @@
-import { useQuery } from "@tanstack/react-query";
-import { useEffect, useRef, useState } from "react";
-import { getLocationByFilter } from "../../../../api/configs/location.config";
-import { LocationEndpoint } from "../../../../api/endpoints/location.endpoint";
-import type { ProfileLocationFilter } from "../../../../common/types/profile";
-import { Pagination } from "../../../../components/PaginationCommon/paginationCommon";
-import { useLoading } from "../../../../providers/loadingProvider";
+import { useLocationList } from "./hooks/useLocationList";
+import type { LocationListViewProps } from "./hooks/useLocationList";
+import { FilterOutlined } from "@ant-design/icons";
+import { Button, Col, Row, Pagination } from "antd";
 import { LocationCard } from "../LocationCard";
+import type { LocationDto } from "@/api/dtos/location.dto";
+import { LocationFilterDrawer } from "../LocationFilterDrawer";
+import { isFavoriteLocation } from "@common/utils/favoriteLocations";
 import "../style.scss";
-import type { LocationDto } from "../../../../api/dtos/location.dto";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { ROUTER_PATH } from "../../../../router/Route";
-
-interface LocationListViewProps {
-  searchValue?: string;
-}
 
 export const LocationListView = (props: LocationListViewProps) => {
-  const { setLoading } = useLoading();
-  const [searchParams] = useSearchParams();
-  const location = searchParams.get("location");
-  const containerRef = useRef<HTMLDivElement>(null);
-  const navigate = useNavigate();
-
-  const [filter, setFilter] = useState<ProfileLocationFilter>({
-    page: 1,
-    limit: 20,
-  });
-
-  const { data: locationData, isLoading: locationLoading } = useQuery({
-    queryKey: [LocationEndpoint.GET_LOCATION_BY_FILTER, filter],
-    queryFn: () => getLocationByFilter(filter),
-  });
-
-  useEffect(() => {
-    setLoading(locationLoading);
-  }, [locationLoading]);
-
-  useEffect(() => {
-    if (location) {
-      setFilter((prev) => ({
-        ...prev,
-        addressRegion: location,
-      }));
-    }
-  }, [location]);
-
-  useEffect(() => {
-    setFilter((prev) => ({
-      ...prev,
-      searchValue: props.searchValue,
-    }));
-  }, [props.searchValue]);
-
-  useEffect(() => {
-    const resizeCards = () => {
-      const cards = containerRef.current?.querySelectorAll(
-        ".location__card",
-      ) as NodeListOf<HTMLElement>;
-
-      if (!cards || cards.length === 0) return;
-
-      cards.forEach((card) => (card.style.height = "auto"));
-
-      let maxHeight = 0;
-      cards.forEach((card) => {
-        if (card.offsetHeight > maxHeight) maxHeight = card.offsetHeight;
-      });
-
-      cards.forEach((card) => {
-        card.style.height = `${maxHeight}px`;
-      });
-    };
-
-    resizeCards();
-    window.addEventListener("resize", resizeCards);
-    return () => window.removeEventListener("resize", resizeCards);
-  }, [locationData]);
-
-  const handlePageChange = (page: number) => {
-    setFilter((prev) => ({ ...prev, page }));
-  };
-
-  const totalPages = locationData?.totalPages ?? 1;
-
-  const handleCardClick = (code: string) => {
-    const url = ROUTER_PATH.LOCATION_DETAIL.replace(":code", code);
-    navigate(url, { state: { code } });
-  };
+  const {
+    canFetchLocations,
+    filter,
+    errorMessage,
+    locationLoading,
+    locations,
+    refetch,
+    handlePageChange,
+    currentPage,
+    totalItems,
+    handleCardClick,
+    isFilterOpen,
+    setIsFilterOpen,
+    containerRef,
+    isEmbedded,
+    isError,
+    isFetching,
+    setFilter,
+  } = useLocationList(props);
 
   return (
     <div className="location__list">
-      <h2 className="location__list-title">Danh sách địa điểm</h2>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: "16px",
+        }}
+      >
+        {props.hideTitle ? (
+          <div />
+        ) : (
+          <h2 className="location__list-title" style={{ margin: 0 }}>
+            {props.title ?? "Danh sách địa điểm"}
+          </h2>
+        )}
 
-      <div className="location__list-content" ref={containerRef}>
-        {locationData?.data?.map((location: LocationDto) => (
-          <LocationCard
-            key={location.locationCode}
-            code={location.locationCode}
-            typeName={location.typeName}
-            name={location.locationName}
-            description={location.locationDescription}
-            address={location.address[0]?.fullAddress}
-            rate={location.locationRate}
-            image={location.locationLogo}
-            isFavourite={false}
-            onClick={handleCardClick}
-          />
-        ))}
+        {!isEmbedded && (
+          <Button
+            icon={<FilterOutlined />}
+            onClick={() => setIsFilterOpen(true)}
+          >
+            Lọc kết quả
+          </Button>
+        )}
       </div>
 
-      <Pagination
-        currentPage={filter.page ?? 1}
-        totalPages={totalPages}
-        onPageChange={handlePageChange}
-      />
+      {canFetchLocations && isFetching && !locationLoading && (
+        <p className="location__list-status">Đang cập nhật danh sách...</p>
+      )}
+
+      <Row
+        gutter={[24, 24]}
+        className="location__list-content"
+        ref={containerRef}
+      >
+        {!canFetchLocations && !isEmbedded ? (
+          <Col span={24}>
+            <div className="location__list-state">
+              <p className="location__list-state-title">
+                Chưa hỗ trợ xem toàn bộ địa điểm
+              </p>
+              <p className="location__list-state-description">
+                Hãy chọn loại hình hoặc khu vực từ menu để xem danh sách phù
+                hợp.
+              </p>
+            </div>
+          </Col>
+        ) : null}
+
+        {canFetchLocations && locationLoading
+          ? Array.from({ length: 8 }, (_, index) => (
+              <Col xs={24} sm={12} md={8} lg={6} key={index}>
+                <div className="location__card-skeleton" />
+              </Col>
+            ))
+          : null}
+
+        {canFetchLocations && !locationLoading && isError ? (
+          <Col span={24}>
+            <div className="location__list-state">
+              <p className="location__list-state-title">
+                Không thể tải danh sách địa điểm
+              </p>
+              <p className="location__list-state-description">{errorMessage}</p>
+              <button
+                type="button"
+                className="location__list-state-action"
+                onClick={() => {
+                  void refetch();
+                }}
+              >
+                Thử lại
+              </button>
+            </div>
+          </Col>
+        ) : null}
+
+        {canFetchLocations &&
+        !locationLoading &&
+        !isError &&
+        locations.length === 0 ? (
+          <Col span={24}>
+            <div className="location__list-state">
+              <p className="location__list-state-title">
+                Không tìm thấy địa điểm nào phù hợp
+              </p>
+              <p className="location__list-state-description">
+                Hãy thử thay đổi từ khóa tìm kiếm hoặc bộ lọc khu vực/loại hình.
+              </p>
+            </div>
+          </Col>
+        ) : null}
+
+        {canFetchLocations && !locationLoading && !isError
+          ? locations.map((location: LocationDto) => (
+              <Col xs={24} sm={12} md={8} lg={6} key={location.locationCode}>
+                <LocationCard
+                  code={location.locationCode}
+                  typeName={location.typeName}
+                  name={location.locationName}
+                  description={location.locationDescription}
+                  address={location.address?.[0]?.fullAddress}
+                  rate={location.locationRate}
+                  price={location.locationPrice}
+                  priceUnit={location.locationPriceUnit}
+                  image={location.locationLogo}
+                  isFavourite={isFavoriteLocation(location.locationCode)}
+                  onClick={handleCardClick}
+                />
+              </Col>
+            ))
+          : null}
+      </Row>
+
+      {canFetchLocations && !locationLoading && !isError && totalItems > 0 ? (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            marginTop: "32px",
+          }}
+        >
+          <Pagination
+            current={currentPage}
+            total={totalItems}
+            pageSize={filter.limit ?? 20}
+            onChange={handlePageChange}
+            showSizeChanger={false}
+          />
+        </div>
+      ) : null}
+
+      {!isEmbedded && (
+        <LocationFilterDrawer
+          open={isFilterOpen}
+          onClose={() => setIsFilterOpen(false)}
+          initialFilter={filter}
+          onApply={(newFilter) => {
+            setFilter(newFilter);
+          }}
+        />
+      )}
     </div>
   );
 };

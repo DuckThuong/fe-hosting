@@ -1,13 +1,18 @@
+import {
+  buildAddressDetailFromNominatim,
+  createEmptyMapAddress,
+  createFullAddressFromNominatim,
+  createMapAddressFromNominatim,
+} from "../../features/mapAddress/address";
+
 export interface MapAddressDto {
   lat: number;
   long: number;
+  addressDetail: string;
   fullAddress: string;
   addressWard: string;
-  addressDistrict: string;
   addressCity: string;
-  addressProvince: string;
   addressCountry: string;
-  addressPostal: string;
   addressLat: string;
   addressLong: string;
   addressRegion: string;
@@ -16,7 +21,8 @@ export interface MapAddressDto {
 export interface CreateMapAddressDto {
   lat: number;
   long: number;
-  fullAddress?: string;
+  addressDetail?: string;
+  fullAddress: string;
   addressWard?: string;
   addressDistrict?: string;
   addressCity?: string;
@@ -31,6 +37,16 @@ export interface NominatimResponseDto {
   lon: string;
   display_name: string;
   address?: {
+    tourism?: string;
+    office?: string;
+    residential?: string;
+    amenity?: string;
+    shop?: string;
+    building?: string;
+    house_number?: string;
+    road?: string;
+    pedestrian?: string;
+    hamlet?: string;
     suburb?: string;
     neighbourhood?: string;
     quarter?: string;
@@ -50,53 +66,31 @@ export interface NominatimResponseDto {
 }
 
 export class MapAddressMapper {
+  private static buildAddressDetail(data: NominatimResponseDto): string {
+    return buildAddressDetailFromNominatim(data);
+  }
+
+  private static buildFullAddress(data: NominatimResponseDto): string {
+    return createFullAddressFromNominatim(data);
+  }
+
   static fromNominatim(
     data: NominatimResponseDto,
     lat: number,
     lng: number,
   ): MapAddressDto {
-    const address = data.address || {};
-
-    return {
-      lat,
-      long: lng,
-      fullAddress: data.display_name || "",
-      addressWard:
-        address.suburb || address.neighbourhood || address.quarter || "",
-      addressDistrict: address.city_district || address.county || "",
-      addressCity: address.city || address.town || address.village || "",
-      addressProvince: address.state || address.province || "",
-      addressCountry: address.country || "",
-      addressPostal: address.postcode || "",
-      addressLat: lat.toString(),
-      addressLong: lng.toString(),
-      addressRegion: address.region || address.state_district || "",
-    };
+    return createMapAddressFromNominatim(data, lat, lng);
   }
 
   static createEmpty(lat: number, lng: number): MapAddressDto {
-    return {
-      lat,
-      long: lng,
-      fullAddress: "",
-      addressWard: "",
-      addressDistrict: "",
-      addressCity: "",
-      addressProvince: "",
-      addressCountry: "",
-      addressPostal: "",
-      addressLat: lat.toString(),
-      addressLong: lng.toString(),
-      addressRegion: "",
-    };
+    return createEmptyMapAddress(lat, lng);
   }
 
   static toDisplayString(address: MapAddressDto): string {
     const parts = [
+      address.addressDetail,
       address.addressWard,
-      address.addressDistrict,
       address.addressCity,
-      address.addressProvince,
       address.addressCountry,
     ].filter(Boolean);
 
@@ -107,7 +101,7 @@ export class MapAddressMapper {
     return !!(
       address.lat &&
       address.long &&
-      (address.fullAddress || address.addressCity || address.addressProvince)
+      (address.fullAddress || address.addressCity)
     );
   }
 }
@@ -116,8 +110,7 @@ export const AddressFieldLabels = {
   fullAddress: "Địa chỉ đầy đủ",
   addressWard: "Phường/Xã",
   addressDistrict: "Quận/Huyện",
-  addressCity: "Thành phố",
-  addressProvince: "Tỉnh/Thành",
+  addressCity: "Tỉnh/Thành phố",
   addressCountry: "Quốc gia",
   addressPostal: "Mã bưu điện",
   addressLat: "Vĩ độ",

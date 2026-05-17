@@ -1,172 +1,42 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { ROUTER_PATH } from "../../router/Route";
 import type { ProfileItem } from "../types/profile";
 import location from "../../assets/images/profile/icn_location.svg";
 import logout from "../../assets/images/profile/icn_logout.svg";
 import profile from "../../assets/images/profile/icn_profile.svg";
 import down from "../../assets/svg/icn-down_single.svg";
-import bill from "../../assets/svg/profile/bill.svg";
 import chat from "../../assets/svg/profile/chat.svg";
-import contract from "../../assets/svg/profile/contract.svg";
 import payment from "../../assets/svg/profile/payment.svg";
 import { LOCATION_TYPE, RENT_TYPE, TYPE_LOG_OUT } from "../constants/constants";
 
-export const items = (navigate: ReturnType<typeof useNavigate>) => [
+export const items = () => [
   {
     key: 1,
     label: <Link to={ROUTER_PATH.HOME}>Trang chủ</Link>,
   },
   {
-    key: 2,
-    label: (
-      <span>
-        Cho thuê <img src={down} alt="Logo" />
-      </span>
-    ),
-    children: [
-      {
-        key: 21,
-        value: RENT_TYPE.MOTEL,
-        label: (
-          <span
-            onClick={() =>
-              navigate(ROUTER_PATH.LOCATIONS, {
-                state: { rent: RENT_TYPE.MOTEL, page: 1 },
-              })
-            }
-          >
-            Phòng trọ
-          </span>
-        ),
-      },
-      {
-        key: 22,
-        value: RENT_TYPE.APARTMENT,
-        label: (
-          <span
-            onClick={() =>
-              navigate(ROUTER_PATH.LOCATIONS, {
-                state: { rent: RENT_TYPE.APARTMENT, page: 1 },
-              })
-            }
-          >
-            Căn hộ
-          </span>
-        ),
-      },
-      {
-        key: 23,
-        value: RENT_TYPE.OFFICE,
-        label: (
-          <span
-            onClick={() =>
-              navigate(ROUTER_PATH.LOCATIONS, {
-                state: { rent: RENT_TYPE.OFFICE, page: 1 },
-              })
-            }
-          >
-            Văn phòng
-          </span>
-        ),
-      },
-      {
-        key: 24,
-        value: RENT_TYPE.FULL_HOUSE,
-        label: (
-          <span
-            onClick={() =>
-              navigate(ROUTER_PATH.LOCATIONS, {
-                state: { rent: RENT_TYPE.FULL_HOUSE, page: 1 },
-              })
-            }
-          >
-            Nhà nguyên căn
-          </span>
-        ),
-      },
-      {
-        key: 25,
-        value: RENT_TYPE.VENUE,
-        label: (
-          <span
-            onClick={() =>
-              navigate(ROUTER_PATH.LOCATIONS, {
-                state: { rent: RENT_TYPE.VENUE, page: 1 },
-              })
-            }
-          >
-            Địa điểm tổ chức sự kiện
-          </span>
-        ),
-      },
-    ],
-  },
-  {
     key: 3,
-    label: (
-      <span>
-        Khu vực <img src={down} alt="Logo" />
-      </span>
-    ),
+    label: <span>Khu vực</span>,
     children: [
       {
         key: 31,
         value: LOCATION_TYPE.NORTH,
         label: (
-          <span
-            onClick={() =>
-              navigate(ROUTER_PATH.LOCATIONS, {
-                state: { location: LOCATION_TYPE.NORTH, page: 1 },
-              })
-            }
-          >
-            Miền Bắc
-          </span>
+          <Link to={`${ROUTER_PATH.LOCATIONS}?region=north`}>Miền Bắc</Link>
         ),
       },
       {
         key: 32,
         value: LOCATION_TYPE.CENTRAL,
         label: (
-          <span
-            onClick={() =>
-              navigate(ROUTER_PATH.LOCATIONS, {
-                state: { location: LOCATION_TYPE.CENTRAL, page: 1 },
-              })
-            }
-          >
-            Miền Trung
-          </span>
+          <Link to={`${ROUTER_PATH.LOCATIONS}?region=central`}>Miền Trung</Link>
         ),
       },
       {
         key: 33,
         value: LOCATION_TYPE.SOUTH,
         label: (
-          <span
-            onClick={() =>
-              navigate(ROUTER_PATH.LOCATIONS, {
-                state: { location: LOCATION_TYPE.SOUTH, page: 1 },
-              })
-            }
-          >
-            Miền Nam
-          </span>
-        ),
-      },
-      {
-        key: 34,
-        value: LOCATION_TYPE.WEST,
-        label: (
-          <span
-            onClick={() =>
-              navigate(ROUTER_PATH.LOCATIONS, {
-                state: { location: LOCATION_TYPE.WEST, page: 1 },
-              })
-            }
-          >
-            Miền Tây
-          </span>
+          <Link to={`${ROUTER_PATH.LOCATIONS}?region=south`}>Miền Nam</Link>
         ),
       },
     ],
@@ -206,27 +76,15 @@ export const profileItems: ProfileItem[] = [
   },
   {
     key: 3,
-    icon: contract,
-    label: "Hợp đồng của tôi",
-    href: ROUTER_PATH.PROFILE_LOCATION,
-  },
-  {
-    key: 4,
     icon: chat,
-    label: "Tin nhắn",
+    label: "Đoạn chat",
     href: ROUTER_PATH.PROFILE_CHAT,
   },
   {
-    key: 5,
-    icon: bill,
-    label: "Hóa đơn",
-    href: ROUTER_PATH.PROFILE_LOCATION,
-  },
-  {
-    key: 6,
+    key: 4,
     icon: payment,
-    label: "Thanh toán",
-    href: ROUTER_PATH.PROFILE_LOCATION,
+    label: "Gói đăng tin",
+    href: ROUTER_PATH.PROFILE_OWNER_PACKAGE,
   },
   {
     key: TYPE_LOG_OUT,

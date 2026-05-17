@@ -14,13 +14,9 @@ import {
 import icon from "leaflet/dist/images/marker-icon.png";
 import iconShadow from "leaflet/dist/images/marker-shadow.png";
 import "./style.scss";
-import {
-  MapAddressMapper,
-  type MapAddressDto,
-  type NominatimResponseDto,
-} from "../../api/dtos/map.dto";
+import type { NominatimResponseDto } from "../../api/dtos/map.dto";
 
-let DefaultIcon = L.icon({
+const DefaultIcon = L.icon({
   iconUrl: icon,
   shadowUrl: iconShadow,
   iconSize: [25, 41],
@@ -30,129 +26,168 @@ let DefaultIcon = L.icon({
 L.Marker.prototype.options.icon = DefaultIcon;
 
 interface MapViewCommonProps {
-  data: MapAddressDto;
-  hasInputSearch?: boolean;
-  onMapClick: (e: MapAddressDto) => void;
+  center: {
+    lat: number;
+    lng: number;
+  };
+  searchState?: {
+    input: string;
+    results: NominatimResponseDto[];
+    isSearching: boolean;
+    isDropdownOpen: boolean;
+    onInputChange: (value: string) => void;
+    onFocus: () => void;
+    onSubmit: () => void | Promise<void>;
+    onSelectResult: (result: NominatimResponseDto) => void;
+    onOpenChange: (open: boolean) => void;
+  };
+  onCoordinateSelect: (value: { lat: number; lng: number }) => void | Promise<void>;
 }
 
-function ChangeView({ center }: { center: [number, number] }) {
+function ChangeView({
+  center,
+}: {
+  center: [number, number];
+}): null {
   const map = useMap();
+
   useEffect(() => {
     map.setView(center, map.getZoom());
   }, [center, map]);
+
   return null;
 }
 
 function MapClickHandler({
-  onMapClick,
+  onCoordinateSelect,
 }: {
-  onMapClick: (data: MapAddressDto) => void;
-}) {
+  onCoordinateSelect: (value: { lat: number; lng: number }) => void | Promise<void>;
+}): null {
   useMapEvents({
-    click(e) {
-      const { lat, lng } = e.latlng;
-
-      fetch(
-        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`,
-      )
-        .then((res) => res.json())
-        .then((data: NominatimResponseDto) => {
-          onMapClick(MapAddressMapper.fromNominatim(data, lat, lng));
-        })
-        .catch(() => {
-          onMapClick(MapAddressMapper.createEmpty(lat, lng));
-        });
+    click(event) {
+      const { lat, lng } = event.latlng;
+      onCoordinateSelect({ lat, lng });
     },
   });
+
   return null;
 }
 
+const getSuggestionTitle = (result: NominatimResponseDto) =>
+  result.address?.amenity ||
+  result.address?.road ||
+  result.address?.hamlet ||
+  result.address?.suburb ||
+  result.address?.neighbourhood ||
+  result.address?.city ||
+  result.address?.town ||
+  result.address?.village ||
+  result.display_name;
+
 export const MapViewCommon: React.FC<MapViewCommonProps> = ({
-  data,
-  hasInputSearch = false,
-  onMapClick,
+  center,
+  searchState,
+  onCoordinateSelect,
 }) => {
-  const [searchInput, setSearchInput] = useState("");
   const [markerPosition, setMarkerPosition] = useState<[number, number]>([
-    data.lat,
-    data.long,
+    center.lat,
+    center.lng,
   ]);
   const markerRef = useRef<L.Marker>(null);
+  const searchWrapperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setMarkerPosition([data.lat, data.long]);
-  }, [data.lat, data.long]);
+    setMarkerPosition([center.lat, center.lng]);
+  }, [center.lat, center.lng]);
 
-  const handleSearch = async () => {
-    if (!searchInput.trim()) return;
-
-    try {
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-          searchInput,
-        )}&addressdetails=1`,
-      );
-      const results: NominatimResponseDto[] = await response.json();
-
-      if (results && results.length > 0) {
-        const result = results[0];
-        if (!result) return;
-        const newLat = parseFloat(result.lat);
-        const newLng = parseFloat(result.lon);
-
-        setMarkerPosition([newLat, newLng]);
-        const parsedData = MapAddressMapper.fromNominatim(
-          result,
-          newLat,
-          newLng,
-        );
-        onMapClick(parsedData);
-        setSearchInput(parsedData.fullAddress);
-      }
-    } catch (error) {
-      console.error("Search error:", error);
+  useEffect(() => {
+    if (!searchState) {
+      return;
     }
-  };
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        searchWrapperRef.current &&
+        !searchWrapperRef.current.contains(event.target as Node)
+      ) {
+        searchState.onOpenChange(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [searchState]);
 
   const handleMarkerDrag = () => {
     const marker = markerRef.current;
-    if (marker) {
-      const { lat, lng } = marker.getLatLng();
 
-      fetch(
-        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`,
-      )
-        .then((res) => res.json())
-        .then((data: NominatimResponseDto) => {
-          const parsedData = MapAddressMapper.fromNominatim(data, lat, lng);
-          onMapClick(parsedData);
-          setSearchInput(parsedData.fullAddress);
-        })
-        .catch(() => {
-          onMapClick(MapAddressMapper.createEmpty(lat, lng));
-        });
+    if (!marker) {
+      return;
     }
+
+    const { lat, lng } = marker.getLatLng();
+    onCoordinateSelect({ lat, lng });
   };
 
   return (
     <div className="map__view">
-      {hasInputSearch && (
-        <div className="map__view__search">
+      {searchState && (
+        <div className="map__view__search" ref={searchWrapperRef}>
           <Input
-            placeholder="Tìm kiếm địa điểm..."
+            placeholder="Tim kiem dia diem..."
             prefix={<SearchOutlined />}
             size="large"
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            onPressEnter={handleSearch}
+            value={searchState.input}
+            onChange={(event) => searchState.onInputChange(event.target.value)}
+            onFocus={searchState.onFocus}
+            onPressEnter={() => {
+              void searchState.onSubmit();
+            }}
           />
+          {searchState.isDropdownOpen && (
+            <div className="map-autocomplete-dropdown">
+              {searchState.isSearching && (
+                <div className="map-autocomplete-dropdown__state">
+                  Dang tim dia diem...
+                </div>
+              )}
+
+              {!searchState.isSearching &&
+                searchState.results.map((result, index) => (
+                  <button
+                    key={`${result.lat}-${result.lon}-${index}`}
+                    type="button"
+                    className="map-autocomplete-dropdown__item"
+                    onClick={() => searchState.onSelectResult(result)}
+                  >
+                    <span className="map-autocomplete-dropdown__item__title">
+                      {getSuggestionTitle(result)}
+                    </span>
+                    <span className="map-autocomplete-dropdown__item__address">
+                      {result.display_name}
+                    </span>
+                  </button>
+                ))}
+
+              {!searchState.isSearching &&
+                searchState.input.trim().length >= 2 &&
+                searchState.results.length === 0 && (
+                  <div className="map-autocomplete-dropdown__state">
+                    Khong tim thay ket qua phu hop.
+                  </div>
+                )}
+            </div>
+          )}
         </div>
       )}
 
       <div className="map__view__container">
         <MapContainer center={markerPosition} zoom={15}>
           <ChangeView center={markerPosition} />
-          <MapClickHandler onMapClick={onMapClick} />
+          <MapClickHandler onCoordinateSelect={onCoordinateSelect} />
 
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

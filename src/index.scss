@@ -1,5 +1,14 @@
 @import "./color.scss";
 
+html,
+body {
+  overflow-x: hidden;
+}
+
+* {
+  font-family: $font_family_1 !important;
+}
+
 .notification-container {
   position: fixed;
   top: 1rem;
@@ -10,7 +19,7 @@
   justify-content: flex-start;
   gap: 8px;
   .notification {
-    min-width: 386px;
+    min-width: min(386px, calc(100vw - 32px));
     height: 48px;
     border-radius: 4px;
     padding: 14px 16px;
@@ -136,6 +145,21 @@
         width: 18px;
         height: 18px;
       }
+    }
+  }
+}
+
+.login-required-modal {
+  .ant-modal-footer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: nowrap;
+    text-align: center;
+
+    .ant-btn + .ant-btn {
+      margin-inline-start: 0;
     }
   }
 }

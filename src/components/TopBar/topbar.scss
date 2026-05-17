@@ -1,18 +1,27 @@
 @import "../../color.scss";
 
+// ═══════════════════════════════════════════
+// TopBar — Core
+// ═══════════════════════════════════════════
 .top__bar {
   position: fixed;
   top: 0px;
   left: 0px;
-  z-index: 12;
+  z-index: 1100;
   width: 100%;
-  height: 67px;
+  height: 64px;
   padding: 8px 0px;
   background-color: $white_color;
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
+  display: block;
   border-bottom: 1px solid $secondary_color;
+
+  .top__bar-desktop {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: 100%;
+  }
 
   .left {
     display: flex;
@@ -20,7 +29,7 @@
     justify-content: center;
     align-items: center;
     gap: 32px;
-    padding: 0px 32px;
+    padding: 0px 16px;
   }
 
   .right {
@@ -28,10 +37,43 @@
     flex-direction: row;
     justify-content: center;
     align-items: center;
-    padding: 0px 32px;
+    padding: 0px 16px;
     gap: 12px;
   }
 
+  &-mobile {
+    display: none;
+    width: 100%;
+    height: 100%;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 0 12px;
+  }
+
+  &-mobile-left {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+  }
+
+  &-mobile-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  &-mobile-right {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+  }
+
+  // ─── Logo ───
   &-logo {
     display: flex;
     flex-direction: row;
@@ -39,6 +81,7 @@
     align-items: center;
     position: relative;
     gap: 12px;
+    text-decoration: none !important;
 
     img {
       width: 45px;
@@ -64,8 +107,18 @@
       height: 100%;
       background-color: $text_color_1;
     }
+
+    &--mobile {
+      flex: 1 1 auto;
+      justify-content: center;
+
+      &::after {
+        display: none;
+      }
+    }
   }
 
+  // ─── Horizontal Menu (desktop) ───
   &-menu {
     .ant-menu {
       background-color: transparent !important;
@@ -148,10 +201,10 @@
     }
   }
 
+  // ─── Host CTA ───
   &-host {
     width: fit-content;
     height: 40px !important;
-    border: 2px solid $text_color_1;
     border-radius: 20px;
     display: flex;
     flex-direction: row;
@@ -161,19 +214,29 @@
     cursor: pointer;
     padding: 0px 8px;
 
-    span {
+    span,
+    &-action {
       font-weight: 500;
       color: $color-text-primary;
       font-size: 14px;
       line-height: 1.5;
       font-family: $font_family_1;
     }
+
+    &-action {
+      border: none;
+      background: transparent;
+      padding: 0;
+      cursor: pointer;
+    }
   }
 
+  // ─── Account Button ───
   &-account {
     width: 80px;
     height: 40px !important;
     border: 2px solid $text_color_1;
+    background: transparent;
     border-radius: 20px;
     display: flex;
     flex-direction: row;
@@ -182,6 +245,7 @@
     align-items: center;
     cursor: pointer;
     position: relative;
+    padding: 0;
 
     .avartar {
       width: 30px;
@@ -195,6 +259,78 @@
     }
   }
 
+  // ─── Guest Auth Buttons ───
+  &-guest {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    .guest-login,
+    .guest-signup {
+      height: 40px;
+      padding: 0px 16px;
+      border-radius: 20px;
+      border: 2px solid $text_color_1;
+      font-weight: 600;
+      font-size: 14px;
+      font-family: $font_family_1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .guest-signup {
+      background-color: $white_color;
+      color: $text_color_1 !important;
+
+      &:hover {
+        background-color: $background-color-1;
+      }
+    }
+
+    .guest-login {
+      background-color: $text_color_1;
+      color: $white_color !important;
+
+      &:hover {
+        background-color: $text_color_4;
+        border-color: $text_color_4;
+      }
+    }
+  }
+
+  .topbar__actions-trigger {
+    border: 2px solid $text_color_1;
+    border-radius: 999px;
+    background: $white_color;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 !important;
+
+    .actions-trigger-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .actions-trigger-label {
+      font-family: $font_family_1;
+      font-size: 14px;
+      font-weight: 600;
+      color: $text_color_1;
+      white-space: nowrap;
+    }
+  }
+
+  // ─── Profile Dropdown (desktop) ───
+  .topbar__profile-section {
+    display: flex;
+  }
+
   .profile__dropdown {
     position: absolute;
     background-color: #ffffff;
@@ -206,35 +342,443 @@
     display: flex;
     gap: 8px;
     flex-direction: column;
-    &-item {
-      padding: 8px 0px;
-      cursor: pointer;
-      &:hover {
-        background-color: darken(#ffffff, 10%);
-        border-radius: 12px;
-      }
-      .ant-col {
-        display: flex;
-        height: fit-content;
-        flex-direction: column;
-        justify-content: center;
-        &-4 {
-          img {
-            width: 24px;
-            height: 24px;
-          }
-        }
+    z-index: 100;
 
+    &-item {
+      border: none;
+      background: transparent;
+      width: 100%;
+      padding: 8px 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-radius: 12px;
+      transition: background-color 0.2s ease;
+
+      &:hover {
+        background-color: darken(#ffffff, 5%);
+      }
+
+      &-icon {
+        flex-shrink: 0;
+
+        img {
+          width: 24px;
+          height: 24px;
+        }
+      }
+
+      &-label {
         p {
-          padding-left: 12px;
-          margin: 0px !important;
+          margin: 0;
+          font-size: 14px;
+          font-weight: 500;
+          font-family: $font_family_1;
+          color: $text_color_1;
+          white-space: nowrap;
         }
       }
     }
   }
 }
 
-// Drop down menu
+// ═══════════════════════════════════════════
+// Hamburger Button
+// ═══════════════════════════════════════════
+.topbar__hamburger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 2px solid $text_color_1;
+  border-radius: 12px;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: $background-color-1;
+  }
+
+  .hamburger-icon {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    width: 20px;
+    height: 20px;
+
+    span {
+      display: block;
+      width: 18px;
+      height: 2px;
+      background-color: $text_color_1;
+      border-radius: 2px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      transform-origin: center;
+    }
+
+    &.open {
+      span:nth-child(1) {
+        transform: translateY(6px) rotate(45deg);
+      }
+      span:nth-child(2) {
+        opacity: 0;
+        transform: scaleX(0);
+      }
+      span:nth-child(3) {
+        transform: translateY(-6px) rotate(-45deg);
+      }
+    }
+  }
+}
+
+// ═══════════════════════════════════════════
+// Mobile Drawer
+// ═══════════════════════════════════════════
+.topbar__drawer {
+  .ant-drawer-body {
+    padding: 0 !important;
+  }
+
+  // ─── Drawer Header ───
+  .topbar__drawer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid darken(#ffffff, 8%);
+  }
+
+  .topbar__drawer-title {
+    font-family: $font_family_1;
+    font-size: 18px;
+    font-weight: 700;
+    color: $color-text-primary;
+  }
+
+  .topbar__drawer-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    img {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+    }
+
+    span {
+      font-weight: 600;
+      font-size: 18px;
+      color: $color-text-primary;
+      font-family: $font_family_1;
+    }
+  }
+
+  .topbar__drawer-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: transparent;
+    border-radius: 50%;
+    font-size: 18px;
+    color: $text_color_1;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background-color: darken(#ffffff, 6%);
+    }
+  }
+
+  // ─── Drawer Content ───
+  .topbar__drawer-content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  .topbar__drawer-content--menu {
+    padding: 8px 0 16px;
+  }
+
+  .topbar__drawer-content--actions {
+    padding: 0 0 16px;
+  }
+
+  &--menu {
+    .ant-drawer-content-wrapper {
+      width: 320px !important;
+      max-width: 90vw;
+    }
+  }
+
+  &--actions {
+    .ant-drawer-content-wrapper {
+      width: 360px !important;
+      max-width: 90vw;
+    }
+  }
+
+  // ─── Drawer Menu ───
+  .topbar__drawer-menu {
+    border-right: none !important;
+    padding: 8px 12px;
+
+    .ant-menu-item {
+      font-size: 15px;
+      font-weight: 500;
+      color: $text_color_1 !important;
+      font-family: $font_family_1;
+      border-radius: 8px;
+      margin-bottom: 2px;
+
+      &:hover,
+      &-selected {
+        background-color: $background-color-1 !important;
+        color: $text_color_3 !important;
+      }
+
+      &::after {
+        display: none !important;
+      }
+    }
+
+    .ant-menu-submenu {
+      .ant-menu-submenu-title {
+        font-size: 15px;
+        font-weight: 500;
+        color: $text_color_1 !important;
+        font-family: $font_family_1;
+        border-radius: 8px;
+
+        &:hover {
+          background-color: $background-color-1 !important;
+          color: $text_color_3 !important;
+        }
+      }
+
+      .ant-menu-sub {
+        background: transparent !important;
+
+        .ant-menu-item {
+          font-size: 14px;
+          font-weight: 400;
+          padding-left: 40px !important;
+        }
+      }
+
+      &::after {
+        display: none !important;
+      }
+    }
+  }
+
+  // ─── Drawer Divider ───
+  .topbar__drawer-divider {
+    height: 1px;
+    background-color: darken(#ffffff, 8%);
+    margin: 4px 20px;
+  }
+
+  // ─── Drawer Actions ───
+  .topbar__drawer-actions {
+    padding: 12px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    .top__bar-host {
+      height: auto !important;
+      padding: 10px 0;
+
+      span,
+      &-action {
+        font-size: 15px;
+        font-weight: 500;
+      }
+    }
+
+    .topbar__profile-section {
+      position: relative;
+
+      .top__bar-account {
+        width: 100%;
+        justify-content: flex-start;
+        padding: 0 12px;
+        gap: 12px;
+        border-radius: 12px;
+        height: 48px !important;
+      }
+
+      .profile__dropdown {
+        position: static;
+        box-shadow: none;
+        border-radius: 12px;
+        background-color: darken(#ffffff, 2%);
+        padding: 8px;
+        margin-top: 8px;
+      }
+    }
+
+    .top__bar-guest {
+      flex-direction: column;
+      gap: 8px;
+
+      .guest-login,
+      .guest-signup {
+        width: 100%;
+        height: 44px;
+        font-size: 15px;
+      }
+    }
+  }
+
+  .topbar__drawer-actions-list {
+    padding: 12px 20px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .topbar__drawer-actions-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .topbar__drawer-actions-heading {
+    font-family: $font_family_1;
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: $text_color_1;
+    opacity: 0.72;
+  }
+
+  .topbar__drawer-action-item {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .topbar__drawer-action-row {
+    width: 100%;
+    min-height: 46px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border: none;
+    border-radius: 14px;
+    font-size: 15px;
+    font-weight: 500;
+    text-align: left;
+    cursor: pointer;
+    box-shadow: none;
+
+    &.ant-btn {
+      height: auto;
+      line-height: 1.5;
+    }
+
+    &--primary {
+      color: $white_color !important;
+      background: $text_color_1;
+      justify-content: center;
+      font-weight: 600;
+    }
+
+    &:hover {
+      background-color: $background-color-1;
+      color: $text_color_3 !important;
+    }
+
+    &--primary:hover {
+      background-color: $text_color_4;
+      border-color: $text_color_4;
+      color: $white_color !important;
+    }
+  }
+
+  .topbar__drawer-action-row-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+
+    img {
+      width: 22px;
+      height: 22px;
+    }
+  }
+
+  .topbar__drawer-action-row-label {
+    flex: 1 1 auto;
+  }
+}
+
+// ═══════════════════════════════════════════
+// Responsive: Tablet (≤ 1024px)
+// ═══════════════════════════════════════════
+@media (max-width: 1024px) {
+  .top__bar {
+    .top__bar-desktop {
+      display: none;
+    }
+
+    &-mobile {
+      display: flex;
+    }
+
+    &-logo {
+      &::after {
+        display: none;
+      }
+    }
+  }
+}
+
+// ═══════════════════════════════════════════
+// Responsive: Mobile (≤ 768px)
+// ═══════════════════════════════════════════
+@media (max-width: 768px) {
+  .top__bar {
+    height: 56px;
+    padding: 6px 0;
+
+    .left {
+      padding: 0 12px;
+    }
+
+    .right {
+      padding: 0 12px;
+    }
+
+    &-logo {
+      img {
+        width: 38px;
+        height: 38px;
+      }
+
+      span {
+        font-size: 18px;
+      }
+    }
+  }
+}
+
+// ═══════════════════════════════════════════
+// Dropdown menu (submenu popup — desktop)
+// ═══════════════════════════════════════════
 .ant-menu-submenu-popup {
   .ant-menu {
     background-color: #ffffff !important;
@@ -275,8 +819,10 @@
   }
 }
 
-//Link style reset
-a {
+// ═══════════════════════════════════════════
+// Link style reset (scoped to TopBar)
+// ═══════════════════════════════════════════
+.top__bar a {
   text-decoration: none !important;
   color: $text_color_1 !important;
 

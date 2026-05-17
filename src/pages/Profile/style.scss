@@ -1,0 +1,34 @@
+@import "@/color.scss";
+
+.profile {
+  width: 100%;
+  overflow: hidden !important;
+
+  &__top {
+    width: 100%;
+    height: 67px;
+    max-height: 67px;
+  }
+
+  &__body {
+    width: 100% !important;
+    max-width: 1400px;
+    padding: 0 24px;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    margin: 0 auto !important;
+  }
+
+
+  &__body-content {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    height: fit-content;
+    padding: 0 !important;
+    margin: 0 auto !important;
+    border-radius: 12px;
+    border: 1px solid rgba($white_color, 0.1);
+  }
+}

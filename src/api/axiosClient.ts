@@ -1,11 +1,13 @@
 import axios from "axios";
-import { ROUTER_PATH } from "../router/Route";
+import { getStoredToken } from "../common/utils/authStorage";
+import { setupResponseInterceptor } from "./refreshInterceptor";
 
-const BASE_URL = process.env.REACT_APP_API_URL ?? "http://localhost:8000/";
+const BASE_URL =
+  process.env.REACT_APP_API_URL ?? "https://txxmnhkg-8000.asse.devtunnels.ms/";
 
 const axiosClient = axios.create({
   baseURL: BASE_URL,
-  timeout: 10000,
+  timeout: 30000,
   headers: {
     "Content-Type": "application/json",
   },
@@ -13,7 +15,7 @@ const axiosClient = axios.create({
 
 axiosClient.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("token");
+    const token = getStoredToken();
 
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -25,17 +27,6 @@ axiosClient.interceptors.request.use(
   },
 );
 
-axiosClient.interceptors.response.use(
-  (response) => {
-    return response;
-  },
-  async (error) => {
-    if (error.response?.status === 401) {
-      console.error("Unauthorized access. Redirecting to login.");
-      window.location.href = ROUTER_PATH.SIGN_IN;
-    }
-    return Promise.reject(error);
-  },
-);
+setupResponseInterceptor(axiosClient);
 
 export default axiosClient;

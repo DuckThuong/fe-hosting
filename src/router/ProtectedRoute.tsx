@@ -1,27 +1,50 @@
-import { useQuery } from "@tanstack/react-query";
 import React, { useEffect } from "react";
-import { Navigate, Outlet } from "react-router-dom";
-import { UserEndpoint } from "../api/endpoints/user.endpoint";
-import { getUserPRofile } from "../api/configs/user.config";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
+import { useAuth } from "../common/contexts/authContext";
 import { useLoading } from "../providers/loadingProvider";
 import { ROUTER_PATH } from "./Route";
 
 const ProtectedRoute: React.FC = () => {
+  const location = useLocation();
   const { setLoading } = useLoading();
-
-  const { data: user, isLoading } = useQuery({
-    queryKey: [UserEndpoint.GET_USER_INFORMATION],
-    queryFn: () => getUserPRofile(),
-  });
+  const { isAuthenticated, user, checkAuthStatus, isLoading, isAuthResolved } =
+    useAuth();
+  const currentPath = `${location.pathname}${location.search}${location.hash}`;
 
   useEffect(() => {
-    setLoading(isLoading);
-  }, [isLoading]);
+    if (!isAuthResolved && !isLoading) {
+      void checkAuthStatus();
+    }
+  }, [isAuthResolved, isLoading, checkAuthStatus]);
 
-  if (!isLoading && !user) {
-    return <Navigate to={ROUTER_PATH.SIGN_IN} replace />;
+  useEffect(() => {
+    setLoading(isLoading || !isAuthResolved);
+  }, [isLoading, isAuthResolved, setLoading]);
+
+  if (isLoading || !isAuthResolved) {
+    return null;
   }
-  localStorage.setItem("userRole", user?.role as string);
+
+  if (!isAuthenticated) {
+    return (
+      <Navigate
+        to={ROUTER_PATH.SIGN_IN}
+        replace
+        state={{ from: currentPath }}
+      />
+    );
+  }
+
+  if (!user) {
+    return (
+      <Navigate
+        to={ROUTER_PATH.SIGN_IN}
+        replace
+        state={{ from: currentPath }}
+      />
+    );
+  }
+
   return <Outlet />;
 };
 

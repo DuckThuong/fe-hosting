@@ -2,11 +2,14 @@ import axiosClient from "../axiosClient";
 import type {
   ForgotPasswordPayloadDto,
   ForgotPasswordResponseDto,
+  RefreshTokenPayloadDto,
+  RefreshTokenResponseDto,
   ResetPasswordPayloadDto,
   ResetPasswordResponseDto,
   SendOtpPayloadDto,
   SendOtpResponseDto,
   SignInPayloadDto,
+  SignInResponseDto,
   SignUpPayloadDto,
   SignUpResponseDto,
   VerifyEmailPayloadDto,
@@ -23,7 +26,7 @@ export const signUp = async (
 
 export const signIn = async (
   payload: SignInPayloadDto,
-): Promise<SignUpResponseDto> => {
+): Promise<SignInResponseDto> => {
   const response = await axiosClient.post(AuthEndPoints.SIGN_IN, payload);
   return response.data;
 };
@@ -66,5 +69,12 @@ export const verifyOtp = async (
   payload: VerifyEmailPayloadDto,
 ): Promise<VerifyEmailResponseDto> => {
   const response = await axiosClient.post(AuthEndPoints.VERIFY_OTP, payload);
+  return response.data;
+};
+
+export const refreshToken = async (
+  payload: RefreshTokenPayloadDto,
+): Promise<RefreshTokenResponseDto> => {
+  const response = await axiosClient.post(AuthEndPoints.REFRESH, payload);
   return response.data;
 };
